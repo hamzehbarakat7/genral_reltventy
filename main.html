@@ -1,681 +1,970 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>محاكي الزمكان 3D</title>
-  <style>
-:root{
-  --bg:#0b0f16; --panel:#0f1624; --accent:#59c1ff; --muted:#9fb3c8;
-  --good:#7ee787; --warn:#ffd166; --bad:#ff6b6b;
-}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>محاكي الزمكان 3D — نسخة أدق</title>
+<style>
+:root{ --bg:#0b0f16; --panel:#0f1624; --accent:#59c1ff; --muted:#9fb3c8; --good:#7ee787; --warn:#ffd166; --bad:#ff6b6b; --grid:#1f2a3d; --text:#e6edf3; --header:#0c1420; }
+:root.light{ --bg:#f7f9fc; --panel:#ffffff; --accent:#0066ff; --muted:#5a6b7e; --good:#1f8f3a; --warn:#a36b00; --bad:#c03d3d; --grid:#e6eef6; --text:#0f172a; --header:#ffffff; }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden}
-body{background:var(--bg);color:#e6edf3;font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0c1420;border-bottom:1px solid #152033;z-index:5}
-header h1{font-size:16px;margin:0;color:#d6e7ff}
+body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
+header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--header);border-bottom:1px solid #152033;z-index:5}
+header h1{font-size:16px;margin:0;color:#cfe3ff}
+:root.light header h1{color:#003366}
 header .badge{padding:3px 8px;border:1px solid #22324a;border-radius:9999px;color:#c2d4ee;font-size:12px}
 header .legend{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
-
 .wrap{display:flex;flex-direction:column;height:calc(100vh - 44px)}
-.main-content{flex:1;position:relative;overflow:hidden;background:radial-gradient(1400px 900px at 50% 40%, #0f1a2a 0, #0b0f16 70%)}
+.main-content{flex:1;position:relative;overflow:hidden;background:radial-gradient(1400px 900px at 50% 40%, #0f1a2a 0, var(--bg) 70%)}
+:root.light .main-content{background:radial-gradient(1400px 900px at 50% 40%, #e6f0ff 0, var(--bg) 70%)}
 aside{background:var(--panel);border-top:1px solid #152033;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;max-height:35vh;overflow-y:auto}
-.group{border:1px solid #1f2a3d;border-radius:10px;padding:10px}
+.group{border:1px solid #1f2a3d;border-radius:10px;padding:10px;background:color-mix(in srgb, var(--panel) 94%, #000 6%)}
 .group h3{margin:0 0 8px 0;font-size:13px;color:#cfe3ff}
+:root.light .group h3{color:#003366}
 .group h4{margin:0 0 6px 0;font-size:12px;color:#b9d3ff}
 label{display:grid;grid-template-columns: 1fr auto; gap:6px; align-items:center;margin:5px 0;font-size:12px}
 input[type="number"], input[type="text"], select{width:140px;background:#0c1320;color:#e6edf3;border:1px solid #1f2a3d;border-radius:6px;padding:5px;font-size:12px}
+:root.light input[type="number"], :root.light input[type="text"], :root.light select{background:#f1f5fb;color:#0f172a;border-color:#cbd5e1}
 input[type="checkbox"]{transform:scale(1.1)}
 input[type="range"]{width:100%}
 button{background:#122035;border:1px solid #283a57;color:#e6f2ff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px}
 button:hover{border-color:#3c577f;background:#1a2a45}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row > *{flex:1}
+:root.light button{background:#e6f0ff;border-color:#bfd4ff;color:#003366}
+.row{display:flex;gap:8px;flex-wrap:wrap} .row > *{flex:1}
 .pill{padding:4px 8px;border-radius:9999px;border:1px solid #22324a;color:#c9ddff;font-size:11px}
-
 #view{display:block;width:100%;height:100%}
-.hud{position:absolute;left:10px;top:10px;background:rgba(15,22,36,.9);border:1px solid #1f2a3d;border-radius:10px;padding:10px;backdrop-filter:blur(6px);min-width:260px;max-width:300px}
+.hud{position:absolute;left:10px;top:10px;background:rgba(15,22,36,.85);border:1px solid #1f2a3d;border-radius:10px;padding:10px;backdrop-filter:blur(6px);min-width:260px;max-width:320px}
+:root.light .hud{background:rgba(255,255,255,.85);border-color:#cbd5e1}
 .grid{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;font-size:11px}
-.kbd{font-family:ui-monospace,monospace;padding:2px 6px;border:1px solid #26344d;border-radius:4px;background:#0e1829;color:#c9d9f7;font-size:11px}
-
 .cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 .card{background:#0e1626;border:1px solid #1f2a3d;border-radius:8px;padding:8px;font-size:11px}
+:root.light .card{background:#ffffff;border-color:#e2e8f0}
 .card h4{margin:0 0 6px 0;font-size:12px;color:#cfe3ff;display:flex;justify-content:space-between;align-items:center}
+:root.light .card h4{color:#003366}
 .card .meta{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;color:#9fb3c8}
+:root.light .card .meta{color:#334155}
 .card .rowBtns{display:flex;gap:4px;margin-top:6px}
 .card button{padding:4px 8px;font-size:10px}
-.muted{color:#9fb3c8;font-size:11px}
 .badgeSmall{padding:2px 5px;border:1px solid #28405e;border-radius:999px;color:#9fd1ff;font-size:10px}
 .selected{outline:2px solid var(--accent)}
 #chart{display:block;margin-top:8px;width:100%;height:90px}
-  </style>
+.toggleTheme{margin-inline-start:8px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>محاكي الزمكان 3D</h1>
-    <span class="badge">RK4 + تكيفي + 1PN + 3D</span>
-    <div class="legend">
-      <span class="pill">إسقاط 3D</span>
-      <span class="pill">مسارات</span>
+<header>
+  <h1>محاكي الزمكان 3D</h1>
+  <span class="badge">RK4 تكيفي + 1PN (نسبي) + 3D</span>
+  <div class="legend">
+    <span class="pill">إسقاط 3D</span>
+    <span class="pill">مسارات</span>
+  </div>
+  <button id="btnTheme" class="toggleTheme">🌙 Night / ☀️ Day</button>
+</header>
+
+<div class="wrap">
+  <div class="main-content">
+    <canvas id="view"></canvas>
+    <div class="hud">
+      <h4>لوحة فيزيائية</h4>
+      <div class="grid" id="stats"></div>
+      <canvas id="chart"></canvas>
     </div>
-  </header>
-
-  <div class="wrap">
-    <div class="main-content">
-      <canvas id="view"></canvas>
-      <div class="hud">
-        <h4>لوحة فيزيائية</h4>
-        <div class="grid" id="stats"></div>
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
-
-    <aside>
-      <div class="group">
-        <h3>التحكم</h3>
-        <div class="row">
-          <button id="btnPlay">▶ تشغيل</button>
-          <button id="btnStep">⏭ خطوة</button>
-          <button id="btnReset">⟲ إعادة</button>
-        </div>
-        <label>السرعة
-          <input type="number" id="speedMul" step="0.5" value="1" style="width:80px" />
-        </label>
-        <label>Δt (ث)
-          <input type="number" id="dt" step="0.1" value="1" style="width:80px" />
-        </label>
-        <label><input type="checkbox" id="adaptive" checked /> تكيفي</label>
-        <label><input type="checkbox" id="enablePN" /> 1PN</label>
-        <label>التصادم
-          <select id="collisionMode" style="width:100px">
-            <option value="none">بدون</option>
-            <option value="merge">دمج</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="group">
-        <h4>كاميرا 3D</h4>
-        <label>تكبير
-          <input id="zoomRange" type="range" min="-100" max="100" step="2" value="0" />
-        </label>
-        <label>دوران أفقي
-          <input id="rotY" type="range" min="0" max="360" step="2" value="45" />
-        </label>
-        <label>دوران عمودي
-          <input id="rotX" type="range" min="-90" max="90" step="2" value="30" />
-        </label>
-        <small class="muted" id="zoomLabel">—</small>
-      </div>
-
-      <div class="group">
-        <h3>مشاهد جاهزة</h3>
-        <select id="preset" style="width:100%">
-          <option value="solar">نظام شمسي</option>
-          <option value="binary">نجمان ثنائيان</option>
-          <option value="three">مشكلة الثلاثة</option>
-          <option value="bhStar">ثقب أسود</option>
-          <option value="random">عشوائي</option>
-        </select>
-        <button id="btnLoadPreset" style="width:100%;margin-top:6px">تحميل</button>
-      </div>
-
-      <div class="group">
-        <h3>إضافة جرم</h3>
-        <label>اسم <input id="bName" value="Body" style="width:100px"/></label>
-        <label>كتلة <input id="bMass" type="number" value="5.972e24" style="width:100px"/></label>
-        <label>x <input id="bX" type="number" value="1.5e11" style="width:100px"/></label>
-        <label>y <input id="bY" type="number" value="0" style="width:100px"/></label>
-        <label>z <input id="bZ" type="number" value="0" style="width:100px"/></label>
-        <label>vx <input id="bVX" type="number" value="0" style="width:100px"/></label>
-        <label>vy <input id="bVY" type="number" value="29780" style="width:100px"/></label>
-        <label>vz <input id="bVZ" type="number" value="0" style="width:100px"/></label>
-        <div class="row" style="margin-top:6px">
-          <button id="btnAdd">➕ إضافة</button>
-          <button id="btnClear">🗑️ حذف</button>
-        </div>
-      </div>
-
-      <div class="group">
-        <h3>خيارات</h3>
-        <label><input type="checkbox" id="showTrails" checked /> المسارات</label>
-        <label><input type="checkbox" id="showGrid" checked /> الشبكة</label>
-        <label>تتبع <select id="track" style="width:100px"></select></label>
-        <button id="btnCSV" style="width:100%">💾 حفظ CSV</button>
-      </div>
-
-      <div class="group">
-        <h3>بطاقات الأجسام</h3>
-        <div id="bodyCards" class="cards"></div>
-      </div>
-    </aside>
   </div>
 
-  <script>
-// === ثوابت ===
-const C = 299792458, G = 6.67430e-11;
+  <aside>
+    <div class="group">
+      <h3>التحكم</h3>
+      <div class="row">
+        <button id="btnPlay">▶ تشغيل</button>
+        <button id="btnStep">⏭ خطوة</button>
+        <button id="btnReset">⟲ إعادة</button>
+      </div>
+      <label>السرعة <input type="number" id="speedMul" step="0.5" value="1" style="width:80px" /></label>
+      <label>Δt (ث) <input type="number" id="dt" step="0.1" value="1" style="width:80px" /></label>
+      <label><input type="checkbox" id="adaptive" checked /> تكيفي</label>
+      <label><input type="checkbox" id="enablePN" /> 1PN</label>
+      <label>التصادم
+        <select id="collisionMode" style="width:100px">
+          <option value="none">بدون</option>
+          <option value="merge">دمج</option>
+        </select>
+      </label>
+      <div class="row" style="margin-top:6px">
+        <button id="btnWarmup">🔥 تسخين (200)</button>
+      </div>
+    </div>
 
-// === حالة ===
+    <div class="group">
+      <h4>كاميرا 3D</h4>
+      <label>تكبير <input id="zoomRange" type="range" min="-200" max="200" step="2" value="0" /></label>
+      <label>دوران أفقي <input id="rotY" type="range" min="0" max="360" step="2" value="45" /></label>
+      <label>دوران عمودي <input id="rotX" type="range" min="-90" max="90" step="2" value="30" /></label>
+      <small class="muted" id="zoomLabel">—</small>
+    </div>
+
+    <div class="group">
+      <h3>مشاهد جاهزة</h3>
+      <select id="preset" style="width:100%">
+        <option value="solar">نظام شمسي</option>
+        <option value="binary">نجمان ثنائيان</option>
+        <option value="three">مشكلة الثلاثة</option>
+        <option value="bhStar">ثقب أسود</option>
+        <option value="random">عشوائي</option>
+      </select>
+      <button id="btnLoadPreset" style="width:100%;margin-top:6px">تحميل</button>
+    </div>
+
+    <div class="group">
+      <h3>إضافة جرم</h3>
+      <label>اسم <input id="bName" value="Body" style="width:100px"/></label>
+      <label>كتلة <input id="bMass" type="number" value="5.972e24" style="width:100px"/></label>
+      <label>x <input id="bX" type="number" value="1.5e11" style="width:100px"/></label>
+      <label>y <input id="bY" type="number" value="0" style="width:100px"/></label>
+      <label>z <input id="bZ" type="number" value="0" style="width:100px"/></label>
+      <label>vx <input id="bVX" type="number" value="0" style="width:100px"/></label>
+      <label>vy <input id="bVY" type="number" value="29780" style="width:100px"/></label>
+      <label>vz <input id="bVZ" type="number" value="0" style="width:100px"/></label>
+      <div class="row" style="margin-top:6px">
+        <button id="btnAdd">➕ إضافة</button>
+        <button id="btnClear">🗑️ حذف الكل</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>خيارات</h3>
+      <label><input type="checkbox" id="showTrails" checked /> المسارات</label>
+      <label><input type="checkbox" id="showGrid" checked /> الشبكة</label>
+      <label>تتبع <select id="track" style="width:100px"></select></label>
+      <button id="btnTrackRecalc" style="width:100%;margin-top:4px">🎯 تتبع + إعادة حساب 40ث</button>
+      <label>وضع التتبع
+  <select id="trackMode" style="width:120px">
+    <option value="free">حر</option>
+    <option value="body">جسم</option>
+    <option value="group">مجموعة</option>
+    <option value="cm">المرجح (CM)</option>
+  </select>
+</label>
+<small style="opacity:.8">في وضع “مجموعة” اختر الأجسام من بطاقاتها (زر 🎯)</small>
+
+      <button id="btnCSV" style="width:100%;margin-top:4px">💾 حفظ CSV</button>
+      <label><input type="checkbox" id="autoReorbit" checked /> إعادة حساب كل 30ث</label>
+      <button id="btnReorbit" style="width:100%">↻ إعادة حساب الآن</button>
+      <label><input type="checkbox" id="anchorHeavy" checked /> تثبيت الأثقل كمرجع</label>
+      <button id="btnBary" style="width:100%;margin-top:4px">↔ إطار باري-مركزي (طرح CM)</button>
+      <button id="btnAnchorHeavy" style="width:100%;margin-top:4px">🎯 تثبيت الأصل عند الأثقل</button>
+      <button id="btnRetune" style="width:100%;margin-top:4px">⚙️ سرعات دائرية حول الأثقل</button>
+
+    </div>
+
+    <div class="group">
+      <h3>بطاقات الأجسام</h3>
+      <div id="bodyCards" class="cards"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+/* ====== ثوابت وحالة عامة ====== */
+const C = 299792458, G = 6.67430e-11, SOFT = 1e6;
 let bodies = [], time = 0, running = false, currentDt = 0;
-const state = {dt:1, minDt:1e-5, maxDt:10, adaptive:true, pn:false, speedMul:1, collision:'none', trails:true, showGrid:true};
+const state = {
+  dt: 1, minDt: 1e-4, maxDt: 20,
+  adaptive: true, pn: false, speedMul: 1,
+  collision: 'merge', trails: true, showGrid: true,
+  relTol: 1e-4, absTol: 1e-1
+};
+// تتبع/كاميرا
+const trackState = {
+  mode: 'free',           // 'free' | 'body' | 'group' | 'cm'
+  bodyIndex: -1,          // يستخدم مع mode='body'
+  group: new Set(),       // مؤشرات الأجسام المختارة
+};
 
-// === DOM ===
 const view = document.getElementById('view');
-const ctx = view.getContext('2d');
+const ctx = view.getContext('2d', { alpha: false });
 const hudStats = document.getElementById('stats');
 const chart = document.getElementById('chart');
 const cctx = chart.getContext('2d');
 const cardsRoot = document.getElementById('bodyCards');
 const q = id => document.getElementById(id);
 
-// === كاميرا 3D (إسقاط منظوري) ===
-let cam = {dist: 5e11, rotX: 30, rotY: 45, scale: 1};
+/* ====== تهيئة واجهة ====== */
+if (q('collisionMode')) q('collisionMode').value = 'merge';
 
-function resize(){
-  view.width = view.clientWidth;
-  view.height = view.clientHeight;
-  chart.width = chart.clientWidth;
-  chart.height = 90;
+/* وضع ليلي/نهاري */
+q('btnTheme').onclick = () => {
+  const root = document.documentElement;
+  root.classList.toggle('light');
+};
+
+/* كاميرا */
+let cam = { dist: 5e11, rotX: 30 * Math.PI / 180, rotY: 45 * Math.PI / 180, scale: 1 };
+function resize() {
+  if (!view || !chart) return;
+  const pr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  view.width = Math.floor(view.clientWidth * pr);
+  view.height = Math.floor(view.clientHeight * pr);
+  chart.width = Math.floor(chart.clientWidth * pr);
+  chart.height = Math.floor(90 * pr);
+  ctx.setTransform(pr,0,0,pr,0,0); // لتفادي ضبابية الرسم
+  cctx.setTransform(pr,0,0,pr,0,0);
 }
 window.addEventListener('resize', resize);
-resize();
 
-function updateCamera(){
-  cam.dist = 2e11 * Math.exp(parseFloat(q('zoomRange').value) * 0.015);
-  cam.rotX = parseFloat(q('rotX').value) * Math.PI / 180;
-  cam.rotY = parseFloat(q('rotY').value) * Math.PI / 180;
-  cam.scale = view.width / (cam.dist * 0.8);
-  q('zoomLabel').textContent = `المسافة: ${(cam.dist/1e9).toFixed(1)} Gm`;
+function updateCamera() {
+  if (!q('zoomRange') || !q('rotX') || !q('rotY')) return;
+  const zr = parseFloat(q('zoomRange').value || 0);
+  cam.dist = 2e11 * Math.exp(zr * 0.0115);
+  cam.rotX = parseFloat(q('rotX').value || 30) * Math.PI / 180;
+  cam.rotY = parseFloat(q('rotY').value || 45) * Math.PI / 180;
+  cam.scale = view.width / Math.max(1, (cam.dist * 0.8));
+  const label = document.getElementById('zoomLabel');
+  if (label && isFinite(cam.dist)) label.textContent = `المسافة: ${(cam.dist / 1e9).toFixed(1)} Gm`;
 }
+if (q('zoomRange')) q('zoomRange').oninput = updateCamera;
+if (q('rotX')) q('rotX').oninput = updateCamera;
+if (q('rotY')) q('rotY').oninput = updateCamera;
 
-q('zoomRange').oninput = updateCamera;
-q('rotX').oninput = updateCamera;
-q('rotY').oninput = updateCamera;
-updateCamera();
-
-// إسقاط 3D إلى 2D
-function project(x, y, z){
+/* إسقاط منظور مبسط */
+function project(x, y, z) {
   const cx = Math.cos(cam.rotY), sx = Math.sin(cam.rotY);
   const cy = Math.cos(cam.rotX), sy = Math.sin(cam.rotX);
-  
-  const x1 = x * cx - y * sx;
-  const y1 = x * sx + y * cx;
-  const z1 = z;
-  
-  const y2 = y1 * cy - z1 * sy;
-  const z2 = y1 * sy + z1 * cy + cam.dist;
-  
-  if(z2 <= 0) return null;
-  
+  const x1 = x * cx - y * sx, y1 = x * sx + y * cx, z1 = z;
+  const y2 = y1 * cy - z1 * sy, z2 = y1 * sy + z1 * cy + cam.dist;
+  if (!isFinite(x1) || !isFinite(y2) || !isFinite(z2) || z2 <= 0) return null;
   const scale = cam.scale * (cam.dist / z2);
-  return [
-    view.width/2 + x1 * scale,
-    view.height/2 - y2 * scale,
-    z2
-  ];
+  if (!isFinite(scale)) return null;
+  const X = (view.width / 2) + x1 * scale, Y = (view.height / 2) - y2 * scale;
+  return (isFinite(X) && isFinite(Y)) ? [X, Y, z2, scale] : null;
 }
 
-// سحب
+/* سحب وتدوير/تكبير */
 let dragging = false, lastX = 0, lastY = 0;
-view.addEventListener('mousedown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
-window.addEventListener('mouseup', () => dragging = false);
-window.addEventListener('mousemove', e => {
-  if(!dragging) return;
-  q('rotY').value = parseFloat(q('rotY').value) + (e.clientX - lastX) * 0.5;
-  q('rotX').value = parseFloat(q('rotX').value) - (e.clientY - lastY) * 0.5;
-  lastX = e.clientX; lastY = e.clientY;
-  updateCamera();
-});
-view.addEventListener('wheel', e => {
-  q('zoomRange').value = parseFloat(q('zoomRange').value) - e.deltaY * 0.1;
-  updateCamera();
-}, {passive: true});
-
-// === أدوات ===
-const v2 = (x,y,z)=>x*x+y*y+z*z;
-const mag = (x,y,z)=>Math.sqrt(x*x+y*y+z*z);
-const clamp = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-const palette = ["#58a6ff","#ff7b72","#8ddb8c","#f2cc60","#c39df3","#76e4f7","#f78fb3","#a8d1ff"]; 
-const randColor=()=> palette[Math.floor(Math.random()*palette.length)];
-
-// === أجسام ===
-function addBody({name, mass, radius, x, y, z, vx, vy, vz, color}){
-  bodies.push({name, mass, radius:Math.max(radius, 1e6), x, y, z:z||0, vx, vy, vz:vz||0, color:color||randColor(), trail:[]});
-  refreshTrackList();
-}
-function clearBodies(){ bodies.length=0; refreshTrackList(); }
-
-// === Presets ===
-function presetSolar(){
-  clearBodies();
-  addBody({name:'Sun', mass:1.989e30, radius:6.96e8, x:0, y:0, z:0, vx:0, vy:0, vz:0, color:'#f6d365'});
-  addBody({name:'Earth', mass:5.972e24, radius:6.371e6, x:1.496e11, y:0, z:0, vx:0, vy:29780, vz:0, color:'#58a6ff'});
-  addBody({name:'Mars', mass:6.39e23, radius:3.389e6, x:2.279e11, y:0, z:0, vx:0, vy:24070, vz:0, color:'#ff7b72'});
-}
-function presetBinary(){
-  clearBodies();
-  const M=2e30, r=7e10, v=16000;
-  addBody({name:'A', mass:M, radius:7e8, x:-r, y:0, z:0, vx:0, vy:-v, vz:0, color:'#ffd166'});
-  addBody({name:'B', mass:M, radius:7e8, x:r, y:0, z:0, vx:0, vy:v, vz:0, color:'#76e4f7'});
-}
-function presetThree(){
-  clearBodies();
-  addBody({name:'A', mass:1e26, radius:1e6, x:-3e8, y:0, z:0, vx:0, vy:1.7e3, vz:0});
-  addBody({name:'B', mass:1e26, radius:1e6, x:3e8, y:0, z:0, vx:0, vy:-1.7e3, vz:0});
-  addBody({name:'C', mass:1e26, radius:1e6, x:0, y:5.2e8, z:0, vx:-1.9e3, vy:0, vz:0});
-}
-function presetBHStar(){
-  clearBodies();
-  addBody({name:'BH', mass:5e30, radius:1e5, x:0, y:0, z:0, vx:0, vy:0, vz:0, color:'#c39df3'});
-  addBody({name:'Star', mass:2e30, radius:7e8, x:2.5e11, y:0, z:0, vx:0, vy:15000, vz:0, color:'#ffd166'});
-}
-function presetRandom(n=20){
-  clearBodies();
-  for(let i=0;i<n;i++){
-    const r = 1e11 + Math.random()*3e11;
-    const theta = Math.random()*Math.PI*2;
-    const phi = Math.acos(2*Math.random()-1);
-    const x = r*Math.sin(phi)*Math.cos(theta);
-    const y = r*Math.sin(phi)*Math.sin(theta);
-    const z = r*Math.cos(phi)*0.3;
-    const mass = 1e24 + Math.random()*1e27;
-    const speed = Math.sqrt(G*1e30/r)* (0.6+Math.random()*0.8);
-    const vx = -speed*Math.sin(theta);
-    const vy = speed*Math.cos(theta);
-    addBody({name:'B'+i, mass, radius: Math.cbrt(mass)*50, x, y, z, vx, vy, vz:0});
-  }
-  addBody({name:'Center', mass:1e30, radius:1e9, x:0, y:0, z:0, vx:0, vy:0, vz:0, color:'#f6d365'});
+if (view) {
+  view.addEventListener('mousedown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+  window.addEventListener('mouseup', () => dragging = false);
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    q('rotY').value = (+q('rotY').value || 0) + (e.clientX - lastX) * 0.5;
+    q('rotX').value = (+q('rotX').value || 0) - (e.clientY - lastY) * 0.5;
+    lastX = e.clientX; lastY = e.clientY; updateCamera();
+  });
+  view.addEventListener('wheel', e => {
+    q('zoomRange').value = (+q('zoomRange').value || 0) - e.deltaY * 0.1;
+    updateCamera();
+  }, { passive: true });
 }
 
-function loadPreset(key){
-  if(key==='solar') presetSolar();
-  else if(key==='binary') presetBinary();
-  else if(key==='three') presetThree();
-  else if(key==='bhStar') presetBHStar();
-  else if(key==='random') presetRandom(20);
-  time=0;
-  for(const b of bodies) b.trail.length = 0;
-  hist.E.length = 0; hist.Lz.length = 0;
-}
+/* أدوات رياضية */
+const v2 = (x, y, z) => x*x + y*y + z*z;
+const mag = (x, y, z) => Math.sqrt(x*x + y*y + z*z);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const palette = ["#58a6ff", "#ff7b72", "#8ddb8c", "#f2cc60", "#c39df3", "#76e4f7", "#f78fb3", "#a8d1ff"];
+const randColor = () => palette[(Math.random()*palette.length)|0];
 
-// === فيزياء ===
-function accelerations(pn){
-  const n=bodies.length;
-  const ax=new Float64Array(n), ay=new Float64Array(n), az=new Float64Array(n);
-  for(let i=0;i<n;i++){
-    const bi=bodies[i];
-    for(let j=i+1;j<n;j++){
-      const bj=bodies[j];
-      const dx=bj.x-bi.x, dy=bj.y-bi.y, dz=bj.z-bi.z;
-      const r2=dx*dx+dy*dy+dz*dz; const r=Math.sqrt(r2)+1e-12;
-      let F = G*bi.mass*bj.mass/(r2);
-      if(pn){
-        const v1=v2(bi.vx,bi.vy,bi.vz), v2j=v2(bj.vx,bj.vy,bj.vz);
-        F *= (1 + (v1+v2j)/(2*C*C)) * (1 + 3*G*(bi.mass+bj.mass)/(r*C*C));
-      }
-      const fx=F*dx/r, fy=F*dy/r, fz=F*dz/r;
-      ax[i]+=fx/bi.mass; ay[i]+=fy/bi.mass; az[i]+=fz/bi.mass;
-      ax[j]-=fx/bj.mass; ay[j]-=fy/bj.mass; az[j]-=fz/bj.mass;
+/* ====== فيزياء ====== */
+function computeAccelerations(usePN) {
+  const n = bodies.length;
+  const ax = new Float64Array(n), ay = new Float64Array(n), az = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const bi = bodies[i];
+    for (let j = i + 1; j < n; j++) {
+      const bj = bodies[j];
+      const dx = bj.x - bi.x, dy = bj.y - bi.y, dz = bj.z - bi.z;
+      const r2 = dx*dx + dy*dy + dz*dz + SOFT*SOFT;
+      const r = Math.sqrt(r2), invr3 = 1.0 / (r2 * r);
+      const f = G * bi.mass * bj.mass * invr3;
+      const fx = f * dx, fy = f * dy, fz = f * dz;
+      ax[i] += fx / bi.mass; ay[i] += fy / bi.mass; az[i] += fz / bi.mass;
+      ax[j] -= fx / bj.mass; ay[j] -= fy / bj.mass; az[j] -= fz / bj.mass;
     }
   }
-  return {ax,ay,az};
+  if (usePN && n >= 2) {
+    let ci = 0; for (let k = 1; k < n; k++) if (bodies[k].mass > bodies[ci].mass) ci = k;
+    const Cb = bodies[ci];
+    for (let i = 0; i < n; i++) {
+      if (i === ci) continue;
+      const b = bodies[i];
+      const rx = b.x - Cb.x, ry = b.y - Cb.y, rz = b.z - Cb.z;
+      const vx = b.vx - Cb.vx, vy = b.vy - Cb.vy, vz = b.vz - Cb.vz;
+      const r = Math.max(1e-9, Math.sqrt(rx*rx + ry*ry + rz*rz));
+      const rhatx = rx / r, rhaty = ry / r, rhatz = rz / r;
+      const v2rel = vx*vx + vy*vy + vz*vz;
+      const vr = vx*rhatx + vy*rhaty + vz*rhatz;
+      const GM = G * Cb.mass, coef = -GM / (r*r);
+      const termR = (4 * GM) / (r * C * C) - (v2rel / (C * C));
+      ax[i] += coef * (termR * rhatx + (4 * vr / (C * C)) * vx);
+      ay[i] += coef * (termR * rhaty + (4 * vr / (C * C)) * vy);
+      az[i] += coef * (termR * rhatz + (4 * vr / (C * C)) * vz);
+    }
+  }
+  return { ax, ay, az };
 }
 
-function rk4Step(dt, usePN){
-  const n=bodies.length;
-  const x0=bodies.map(b=>b.x), y0=bodies.map(b=>b.y), z0=bodies.map(b=>b.z);
-  const vx0=bodies.map(b=>b.vx), vy0=bodies.map(b=>b.vy), vz0=bodies.map(b=>b.vz);
-  
-  let {ax:ax1, ay:ay1, az:az1} = accelerations(usePN);
-  for(let i=0;i<n;i++){
-    bodies[i].x = x0[i] + 0.5*dt*vx0[i];
-    bodies[i].y = y0[i] + 0.5*dt*vy0[i];
-    bodies[i].z = z0[i] + 0.5*dt*vz0[i];
-    bodies[i].vx = vx0[i] + 0.5*dt*ax1[i];
-    bodies[i].vy = vy0[i] + 0.5*dt*ay1[i];
-    bodies[i].vz = vz0[i] + 0.5*dt*az1[i];
+function rk4Step(dt, usePN) {
+  const n = bodies.length;
+  const x0 = new Float64Array(n), y0 = new Float64Array(n), z0 = new Float64Array(n);
+  const vx0 = new Float64Array(n), vy0 = new Float64Array(n), vz0 = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const b = bodies[i];
+    x0[i]=b.x; y0[i]=b.y; z0[i]=b.z; vx0[i]=b.vx; vy0[i]=b.vy; vz0[i]=b.vz;
   }
-  
-  let {ax:ax2, ay:ay2, az:az2} = accelerations(usePN);
-  const vx1=bodies.map(b=>b.vx), vy1=bodies.map(b=>b.vy), vz1=bodies.map(b=>b.vz);
-  for(let i=0;i<n;i++){
-    bodies[i].x = x0[i] + 0.5*dt*vx1[i];
-    bodies[i].y = y0[i] + 0.5*dt*vy1[i];
-    bodies[i].z = z0[i] + 0.5*dt*vz1[i];
-    bodies[i].vx = vx0[i] + 0.5*dt*ax2[i];
-    bodies[i].vy = vy0[i] + 0.5*dt*ay2[i];
-    bodies[i].vz = vz0[i] + 0.5*dt*az2[i];
-  }
-  
-  let {ax:ax3, ay:ay3, az:az3} = accelerations(usePN);
-  const vx2=bodies.map(b=>b.vx), vy2=bodies.map(b=>b.vy), vz2=bodies.map(b=>b.vz);
-  for(let i=0;i<n;i++){
-    bodies[i].x = x0[i] + dt*vx2[i];
-    bodies[i].y = y0[i] + dt*vy2[i];
-    bodies[i].z = z0[i] + dt*vz2[i];
-    bodies[i].vx = vx0[i] + dt*ax3[i];
-    bodies[i].vy = vy0[i] + dt*ay3[i];
-    bodies[i].vz = vz0[i] + dt*az3[i];
-  }
-  
-  let {ax:ax4, ay:ay4, az:az4} = accelerations(usePN);
-  
-  for(let i=0;i<n;i++){
-    bodies[i].vx = vx0[i] + dt*(ax1[i] + 2*ax2[i] + 2*ax3[i] + ax4[i])/6;
-    bodies[i].vy = vy0[i] + dt*(ay1[i] + 2*ay2[i] + 2*ay3[i] + ay4[i])/6;
-    bodies[i].vz = vz0[i] + dt*(az1[i] + 2*az2[i] + 2*az3[i] + az4[i])/6;
-    bodies[i].x = x0[i] + dt*(vx0[i] + 2*vx1[i] + 2*vx2[i] + vx2[i])/6;
-    bodies[i].y = y0[i] + dt*(vy0[i] + 2*vy1[i] + 2*vy2[i] + vy2[i])/6;
-    bodies[i].z = z0[i] + dt*(vz0[i] + 2*vz1[i] + 2*vz2[i] + vz2[i])/6;
+  let { ax: ax1, ay: ay1, az: az1 } = computeAccelerations(usePN);
+  const k1x = vx0.slice(0), k1y = vy0.slice(0), k1z = vz0.slice(0);
+  const k1vx = ax1.slice(0), k1vy = ay1.slice(0), k1vz = az1.slice(0);
+
+  for (let i=0;i<n;i++){ bodies[i].x=x0[i]+0.5*dt*k1x[i]; bodies[i].y=y0[i]+0.5*dt*k1y[i]; bodies[i].z=z0[i]+0.5*dt*k1z[i];
+    bodies[i].vx=vx0[i]+0.5*dt*k1vx[i]; bodies[i].vy=vy0[i]+0.5*dt*k1vy[i]; bodies[i].vz=vz0[i]+0.5*dt*k1vz[i]; }
+  let { ax: ax2, ay: ay2, az: az2 } = computeAccelerations(usePN);
+  const k2x = bodies.map(b=>b.vx), k2y = bodies.map(b=>b.vy), k2z = bodies.map(b=>b.vz);
+  const k2vx = ax2.slice(0), k2vy = ay2.slice(0), k2vz = az2.slice(0);
+
+  for (let i=0;i<n;i++){ bodies[i].x=x0[i]+0.5*dt*k2x[i]; bodies[i].y=y0[i]+0.5*dt*k2y[i]; bodies[i].z=z0[i]+0.5*dt*k2z[i];
+    bodies[i].vx=vx0[i]+0.5*dt*k2vx[i]; bodies[i].vy=vy0[i]+0.5*dt*k2vy[i]; bodies[i].vz=vz0[i]+0.5*dt*k2vz[i]; }
+  let { ax: ax3, ay: ay3, az: az3 } = computeAccelerations(usePN);
+  const k3x = bodies.map(b=>b.vx), k3y = bodies.map(b=>b.vy), k3z = bodies.map(b=>b.vz);
+  const k3vx = ax3.slice(0), k3vy = ay3.slice(0), k3vz = az3.slice(0);
+
+  for (let i=0;i<n;i++){ bodies[i].x=x0[i]+dt*k3x[i]; bodies[i].y=y0[i]+dt*k3y[i]; bodies[i].z=z0[i]+dt*k3z[i];
+    bodies[i].vx=vx0[i]+dt*k3vx[i]; bodies[i].vy=vy0[i]+dt*k3vy[i]; bodies[i].vz=vz0[i]+dt*k3vz[i]; }
+  let { ax: ax4, ay: ay4, az: az4 } = computeAccelerations(usePN);
+  const k4x = bodies.map(b=>b.vx), k4y = bodies.map(b=>b.vy), k4z = bodies.map(b=>b.vz);
+  const k4vx = ax4.slice(0), k4vy = ay4.slice(0), k4vz = az4.slice(0);
+
+  for (let i=0;i<n;i++){
+    bodies[i].x = x0[i] + dt * (k1x[i] + 2*k2x[i] + 2*k3x[i] + k4x[i]) / 6;
+    bodies[i].y = y0[i] + dt * (k1y[i] + 2*k2y[i] + 2*k3y[i] + k4y[i]) / 6;
+    bodies[i].z = z0[i] + dt * (k1z[i] + 2*k2z[i] + 2*k3z[i] + k4z[i]) / 6;
+    bodies[i].vx= vx0[i] + dt * (k1vx[i]+ 2*k2vx[i]+ 2*k3vx[i]+ k4vx[i]) / 6;
+    bodies[i].vy= vy0[i] + dt * (k1vy[i]+ 2*k2vy[i]+ 2*k3vy[i]+ k4vy[i]) / 6;
+    bodies[i].vz= vz0[i] + dt * (k1vz[i]+ 2*k2vz[i]+ 2*k3vz[i]+ k4vz[i]) / 6;
   }
 }
 
-function integrateAdaptive(baseDt){
-  rk4Step(baseDt*state.speedMul, state.pn);
-  time += baseDt*state.speedMul;
-  return baseDt;
+/* تكيف زمني */
+function tryAdvance(dt, usePN) {
+  const saved = bodies.map(b => ({ x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz }));
+  rk4Step(dt, usePN);
+  const oneStep = bodies.map(b => ({ x:b.x,y:b.y,z:b.z }));
+  for (let i=0;i<bodies.length;i++) Object.assign(bodies[i], saved[i]);
+  rk4Step(dt/2, usePN); rk4Step(dt/2, usePN);
+  const twoHalf = bodies.map(b => ({ x:b.x,y:b.y,z:b.z }));
+  let maxErr = 0;
+  for (let i=0;i<bodies.length;i++){
+    const a=oneStep[i], b=twoHalf[i];
+    const ex=Math.abs(a.x-b.x), ey=Math.abs(a.y-b.y), ez=Math.abs(a.z-b.z);
+    const scale = state.absTol + Math.max(Math.abs(a.x),Math.abs(b.x)) * state.relTol;
+    maxErr = Math.max(maxErr, ex/scale, ey/scale, ez/scale);
+  }
+  if (maxErr > 1) {
+    for (let i=0;i<bodies.length;i++) Object.assign(bodies[i], saved[i]);
+    return { accepted:false, suggested: clamp(dt * Math.max(0.2, 0.9/Math.pow(maxErr,0.25)), state.minDt, state.maxDt) };
+  }
+  return { accepted:true, suggested: clamp(dt * Math.min(2.0, 0.9/Math.pow(maxErr+1e-12,0.2)), state.minDt, state.maxDt) };
+}
+function integrateAdaptive(baseDt) {
+  let dt = baseDt * state.speedMul;
+  if (!state.adaptive) { rk4Step(dt, state.pn); time += dt; currentDt = dt; return dt; }
+  let ok=false, trial=dt, newDt=dt, guard=0;
+  while (!ok && guard < 8) {
+    const r = tryAdvance(trial, state.pn);
+    if (r.accepted){ ok=true; newDt=r.suggested; } else { trial=r.suggested; }
+    guard++;
+  }
+  time += trial; currentDt = trial;
+  state.dt = clamp(newDt, state.minDt, state.maxDt);
+  if (q('dt')) q('dt').value = state.dt;
+  return trial;
 }
 
-function handleCollisions(){
-  if(state.collision==='none') return;
-  const removed=[];
-  for(let i=0;i<bodies.length;i++){
-    for(let j=i+1;j<bodies.length;j++){
+/* تصادمات دمجية */
+function handleCollisions() {
+  if (state.collision !== 'merge') return;
+  const removed = [];
+  for (let i=0;i<bodies.length;i++){
+    for (let j=i+1;j<bodies.length;j++){
       const bi=bodies[i], bj=bodies[j];
-      const r=mag(bj.x-bi.x, bj.y-bi.y, bj.z-bi.z);
-      if(r <= bi.radius + bj.radius && state.collision==='merge'){
+      const r = mag(bj.x-bi.x, bj.y-bi.y, bj.z-bi.z);
+      const Rsum = (Number(bi.radius)||0) + (Number(bj.radius)||0);
+      if (r <= Math.max(1, Rsum)) {
         const M = bi.mass + bj.mass;
-        bi.vx = (bi.vx*bi.mass + bj.vx*bj.mass)/M;
-        bi.vy = (bi.vy*bi.mass + bj.vy*bj.mass)/M;
-        bi.vz = (bi.vz*bi.mass + bj.vz*bj.mass)/M;
-        bi.x = (bi.x*bi.mass + bj.x*bj.mass)/M;
-        bi.y = (bi.y*bi.mass + bj.y*bj.mass)/M;
-        bi.z = (bi.z*bi.mass + bj.z*bj.mass)/M;
+        bi.vx = (bi.vx*bi.mass + bj.vx*bj.mass) / M;
+        bi.vy = (bi.vy*bi.mass + bj.vy*bj.mass) / M;
+        bi.vz = (bi.vz*bi.mass + bj.vz*bj.mass) / M;
+        bi.x  = (bi.x *bi.mass + bj.x *bj.mass) / M;
+        bi.y  = (bi.y *bi.mass + bj.y *bj.mass) / M;
+        bi.z  = (bi.z *bi.mass + bj.z *bj.mass) / M;
         bi.mass = M;
-        bi.radius = Math.cbrt(Math.pow(bi.radius,3)+Math.pow(bj.radius,3));
-        bi.name = bi.name+"+"+bj.name;
+        const r1 = Math.max(1, Number(bi.radius)||1), r2 = Math.max(1, Number(bj.radius)||1);
+        bi.radius = Math.cbrt(r1**3 + r2**3);
+        bi.name = bi.name + "+" + bj.name;
         removed.push(j);
       }
     }
   }
   removed.sort((a,b)=>b-a).forEach(idx=>bodies.splice(idx,1));
-  if(removed.length) refreshTrackList();
+  if (removed.length) refreshTrackList();
 }
 
-function energyAndAngMom(){
+/* طاقة وزخم */
+function energyAndAngMom() {
   let KE=0, PE=0, Lz=0;
-  for(const b of bodies) KE += 0.5*b.mass*v2(b.vx,b.vy,b.vz);
-  for(let i=0;i<bodies.length;i++){
-    for(let j=i+1;j<bodies.length;j++){
-      const r=mag(bodies[j].x-bodies[i].x, bodies[j].y-bodies[i].y, bodies[j].z-bodies[i].z)+1e-12;
-      PE += -G*bodies[i].mass*bodies[j].mass/r;
+  for (const b of bodies) KE += 0.5 * b.mass * v2(b.vx,b.vy,b.vz);
+  for (let i=0;i<bodies.length;i++){
+    for (let j=i+1;j<bodies.length;j++){
+      const r = mag(bodies[j].x-bodies[i].x, bodies[j].y-bodies[i].y, bodies[j].z-bodies[i].z) + SOFT;
+      PE += -G * bodies[i].mass * bodies[j].mass / r;
     }
   }
-  for(const b of bodies) Lz += b.mass*(b.x*b.vy - b.y*b.vx);
-  return {E:KE+PE, KE, PE, Lz};
+  for (const b of bodies) Lz += b.mass * (b.x * b.vy - b.y * b.vx);
+  return { E:KE+PE, KE, PE, Lz };
 }
 
-// === رسم ===
-const trailMax = 400;
-function pushTrail(){
-  if(!state.trails) return;
-  for(const b of bodies){
-    const p = project(b.x, b.y, b.z);
-    if(p) b.trail.push(p);
-    if(b.trail.length > trailMax) b.trail.shift();
+/* مدار نسبي مبسّط + تقدّم حضيض */
+function computeRelativisticOrbitForBody(bodyIndex) {
+  if (bodies.length < 2) return;
+  let ci = 0; for (let k = 1; k < bodies.length; k++) if (bodies[k].mass > bodies[ci].mass) ci = k;
+  if (bodyIndex === ci) return;
+
+  const b = bodies[bodyIndex], Cb = bodies[ci];
+  const rx = b.x - Cb.x, ry = b.y - Cb.y, rz = b.z - Cb.z;
+  const vx = b.vx - Cb.vx, vy = b.vy - Cb.vy, vz = b.vz - Cb.vz;
+  const r = mag(rx,ry,rz);
+  const speed2 = v2(vx,vy,vz);            // <-- إصلاح تعارض الاسم
+  const mu = G * (Cb.mass + b.mass);
+
+  const hx = ry*vz - rz*vy, hy = rz*vx - rx*vz, hz = rx*vy - ry*vx;
+  const h2 = hx*hx + hy*hy + hz*hz;
+  const E = speed2/2 - mu/r;
+
+  let a = 0;
+  if (E < 0) a = -mu/(2*E);
+  else if (Math.abs(E) < 1e-12) a = Infinity;
+  else a = mu/(2*E);
+
+  let e;
+  if (E < 0) e = Math.sqrt(Math.max(0, 1 + 2*E*h2/(mu*mu)));
+  else if (Math.abs(E) < 1e-12) e = 1;
+  else e = Math.sqrt(Math.max(0, 1 + 2*E*h2/(mu*mu)));
+
+  let deltaPhiRad = 0;
+  if (E < 0 && e < 1 && isFinite(a)) {
+    const GM = G * Cb.mass;
+    const one_minus_e2 = Math.max(1e-12, 1 - e*e);
+    const p = a * one_minus_e2;
+    deltaPhiRad = (6 * Math.PI * GM) / (C*C * p);
+    const P = 2 * Math.PI * Math.sqrt(a*a*a / mu);
+    const secPerCentury = 100 * 365.25 * 24 * 3600;
+    const arcsecPerRad = 180 / Math.PI * 3600;
+    const precessionArcsecPerCentury = (deltaPhiRad / P) * secPerCentury * arcsecPerRad;
+    b.precession = isFinite(precessionArcsecPerCentury) ? precessionArcsecPerCentury : 0;
+  } else {
+    b.precession = 0;
   }
+  b.a = a; b.e = e; b.centerBody = Cb.name;
 }
 
-function render(){
-  ctx.fillStyle = '#0b0f16';
-  ctx.fillRect(0, 0, view.width, view.height);
-  
-  // شبكة
-  if(state.showGrid){
-    ctx.strokeStyle = '#1f2a3d';
-    ctx.lineWidth = 0.5;
-    const gridSize = 10;
-    const gridSpacing = cam.dist * 0.15;
-    for(let i=-gridSize; i<=gridSize; i++){
-      const p1 = project(i*gridSpacing, -gridSize*gridSpacing, 0);
-      const p2 = project(i*gridSpacing, gridSize*gridSpacing, 0);
-      if(p1 && p2){
-        ctx.beginPath();
-        ctx.moveTo(p1[0], p1[1]);
-        ctx.lineTo(p2[0], p2[1]);
-        ctx.stroke();
-      }
-      const p3 = project(-gridSize*gridSpacing, i*gridSpacing, 0);
-      const p4 = project(gridSize*gridSpacing, i*gridSpacing, 0);
-      if(p3 && p4){
-        ctx.beginPath();
-        ctx.moveTo(p3[0], p3[1]);
-        ctx.lineTo(p4[0], p4[1]);
-        ctx.stroke();
-      }
-    }
-  }
-  
-  // مسارات
-  if(state.trails){
-    for(const b of bodies){
-      if(b.trail.length < 2) continue;
-      ctx.strokeStyle = b.color;
-      ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.moveTo(b.trail[0][0], b.trail[0][1]);
-      for(let i=1; i<b.trail.length; i++){
-        ctx.lineTo(b.trail[i][0], b.trail[i][1]);
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-  }
-  
-  // رسم الأجسام مرتبة حسب العمق
-  const sorted = bodies.map(b => {
-    const p = project(b.x, b.y, b.z);
-    return {b, p};
-  }).filter(x => x.p).sort((a,b) => b.p[2] - a.p[2]);
-  
-  for(const {b, p} of sorted){
-    const size = Math.max(2, Math.min(50, b.radius * cam.scale * (cam.dist / p[2])));
-    
-    // توهج
-    const grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], size*1.5);
-    grad.addColorStop(0, b.color);
-    grad.addColorStop(0.7, b.color + '80');
-    grad.addColorStop(1, b.color + '00');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(p[0], p[1], size*1.5, 0, Math.PI*2);
-    ctx.fill();
-    
-    // الجسم
-    ctx.fillStyle = b.color;
-    ctx.beginPath();
-    ctx.arc(p[0], p[1], size, 0, Math.PI*2);
-    ctx.fill();
-  }
-  
-  // تتبع
-  const tracked = q('track').value;
-  if(tracked){
-    const b = bodies.find(x => x.name === tracked);
-    if(b){
-      const p = project(b.x, b.y, b.z);
-      if(p){
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        const size = Math.max(2, Math.min(50, b.radius * cam.scale * (cam.dist / p[2])));
-        ctx.arc(p[0], p[1], size + 10, 0, Math.PI*2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-    }
-  }
-}
-
-function renderHUD(){
-  hudStats.innerHTML='';
-  const {E,KE,PE,Lz} = energyAndAngMom();
-  const row=(k,v)=>{ 
-    const dv=document.createElement('div'); 
-    dv.textContent=k; 
-    hudStats.appendChild(dv); 
-    const vv=document.createElement('div'); 
-    vv.textContent=v; 
-    hudStats.appendChild(vv); 
-  };
-  row('الأجسام', bodies.length);
-  row('الزمن', time.toExponential(2) + ' ث');
-  row('Δt', currentDt.toExponential(2));
-  row('الطاقة', E.toExponential(3));
-  row('Lz', Lz.toExponential(3));
-  row('PN', state.pn ? 'نعم':'لا');
-  drawChart(E,Lz);
-  renderBodyCards();
-}
-
-const hist = {E:[], Lz:[], max:300};
-function drawChart(E,Lz){
-  hist.E.push(E); hist.Lz.push(Lz);
-  if(hist.E.length>hist.max){ hist.E.shift(); hist.Lz.shift(); }
-  cctx.clearRect(0,0,chart.width,chart.height);
-  const pad=6, w=chart.width-2*pad, h=chart.height-2*pad;
-  const n=hist.E.length; if(n<2) return;
-  const minE=Math.min(...hist.E), maxE=Math.max(...hist.E);
-  const minL=Math.min(...hist.Lz), maxL=Math.max(...hist.Lz);
-  const map = (v,lo,hi)=> pad + (1 - (v-lo)/((hi-lo)||1)) * h;
-  const step=w/(n-1);
-  
-  cctx.strokeStyle='#7ee787'; cctx.lineWidth=1.5; cctx.beginPath();
-  for(let i=0;i<n;i++){ 
-    const x=pad+i*step, y=map(hist.E[i],minE,maxE); 
-    if(i===0) cctx.moveTo(x,y); else cctx.lineTo(x,y); 
-  }
-  cctx.stroke();
-  
-  cctx.strokeStyle='#59c1ff'; cctx.lineWidth=1.5; cctx.beginPath();
-  for(let i=0;i<n;i++){ 
-    const x=pad+i*step, y=map(hist.Lz[i],minL,maxL); 
-    if(i===0) cctx.moveTo(x,y); else cctx.lineTo(x,y); 
-  }
-  cctx.stroke();
-}
-
-// UI
-q('btnPlay').onclick = ()=>{ 
-  running=!running; 
-  q('btnPlay').textContent = running? '⏸ إيقاف':'▶ تشغيل'; 
-};
-q('btnStep').onclick = ()=>{ stepOnce(); render(); renderHUD(); };
-q('btnReset').onclick = ()=>{ loadPreset(q('preset').value); };
-q('btnLoadPreset').onclick = ()=> loadPreset(q('preset').value);
-q('btnCSV').onclick = ()=>{
-  let csv = 'time,name,x,y,z,vx,vy,vz\n';
-  for(const b of bodies) csv += `${time},${b.name},${b.x},${b.y},${b.z},${b.vx},${b.vy},${b.vz}\n`;
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a=document.createElement('a'); 
-  a.href=URL.createObjectURL(blob); 
-  a.download='snapshot.csv'; 
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-};
-q('btnAdd').onclick = ()=>{
-  addBody({
-    name:q('bName').value||('B'+(bodies.length+1)),
-    mass:parseFloat(q('bMass').value)||1e24, 
-    radius:Math.max(1e6, parseFloat(q('bMass').value)**(1/3)*100),
-    x:parseFloat(q('bX').value)||0, 
-    y:parseFloat(q('bY').value)||0,
-    z:parseFloat(q('bZ').value)||0,
-    vx:parseFloat(q('bVX').value)||0, 
-    vy:parseFloat(q('bVY').value)||0,
-    vz:parseFloat(q('bVZ').value)||0
-  });
-};
-q('btnClear').onclick = ()=>{ clearBodies(); time=0; };
-
-q('adaptive').onchange = e=> state.adaptive = e.target.checked;
-q('enablePN').onchange = e=> state.pn = e.target.checked;
-q('showTrails').onchange = e=> { 
-  state.trails = e.target.checked; 
-  if(!state.trails) for(const b of bodies) b.trail.length = 0;
-};
-q('showGrid').onchange = e=> state.showGrid = e.target.checked;
-q('speedMul').onchange = e=> state.speedMul = parseFloat(e.target.value) || 1;
-q('dt').onchange = e=> state.dt = parseFloat(e.target.value) || 1;
-q('collisionMode').onchange = e=> state.collision = e.target.value;
-
-document.addEventListener('keydown', e=>{
-  if(e.code==='Space'){ 
-    e.preventDefault(); 
-    running=!running; 
-    q('btnPlay').textContent = running? '⏸ إيقاف':'▶ تشغيل'; 
-  }
-});
-
-function refreshTrackList(){
-  const sel = q('track'), v=sel.value; 
-  sel.innerHTML='';
-  sel.appendChild(new Option('بدون', ''));
-  for(const b of bodies) sel.appendChild(new Option(b.name, b.name));
-  sel.value = v && bodies.find(x=>x.name===v) ? v : '';
-  renderBodyCards();
-}
-
-function renderBodyCards(){
-  if(!cardsRoot) return;
-  cardsRoot.innerHTML='';
-  const tracked = q('track').value;
-  for(const b of bodies){
+/* بطاقات */
+function refreshCards() {
+  if (!cardsRoot) return;
+  cardsRoot.innerHTML = '';
+  bodies.forEach((b,i)=>{
     const card = document.createElement('div');
-    card.className = 'card' + (tracked===b.name ? ' selected' : '');
-    const speed = mag(b.vx,b.vy,b.vz);
-    const r = mag(b.x,b.y,b.z);
-    const gamma = 1/Math.sqrt(Math.max(0.001, 1-Math.min(speed*speed, C*C)/(C*C)));
+    card.className = 'card' + (b.selected ? ' selected' : '');
+    const km = isFinite(b.radius) ? (b.radius/1000).toFixed(0) : '—';
     card.innerHTML = `
-      <h4>
-        <span>${b.name}</span>
-        <span class="badgeSmall">γ=${gamma.toFixed(3)}</span>
+      <h4>${b.name}
+        <span class="badgeSmall" style="background:${b.color};color:#000;border-color:rgba(0,0,0,0.2)">${km} km</span>
       </h4>
       <div class="meta">
-        <div>m:</div><div>${b.mass.toExponential(1)}</div>
-        <div>|r|:</div><div>${r.toExponential(2)}</div>
-        <div>|v|:</div><div>${speed.toExponential(2)}</div>
+        <span>كتلة:</span> <span>${b.mass.toExponential(2)} kg</span>
+        <span>موقع:</span> <span>(${(b.x/1e9).toFixed(1)}, ${(b.y/1e9).toFixed(1)}, ${(b.z/1e9).toFixed(1)}) Gm</span>
+        <span>سرعة:</span> <span>${mag(b.vx,b.vy,b.vz).toFixed(1)} m/s</span>
       </div>
+      ${b.precession ? `
+      <div class="meta" style="margin-top:4px">
+        <span>مرجع:</span> <span>${b.centerBody}</span>
+        <span>a:</span> <span>${isFinite(b.a)?(b.a/1e9).toFixed(1):'—'} Gm</span>
+        <span>e:</span> <span>${isFinite(b.e)?b.e.toFixed(4):'—'}</span>
+        <span style="color:var(--accent)">معدل التقدم:</span> <span style="color:var(--accent)">${b.precession.toFixed(2)} "/قرن</span>
+      </div>`: '' }
       <div class="rowBtns">
-        <button data-act="track">تتبع</button>
-        <button data-act="boost">دفعة</button>
-      </div>`;
-    card.querySelector('[data-act="track"]').onclick = ()=>{ q('track').value=b.name; };
-    card.querySelector('[data-act="boost"]').onclick = ()=>{ 
-      b.vx*=1.1; b.vy*=1.1; b.vz*=1.1; 
-    };
+  <button onclick="selectBody(${i})">${b.selected ? '✓ محدد' : 'تحديد'}</button>
+  <button onclick="toggleTrackGroup(${i})" style="background:${trackState.group.has(i)?'#2b9348':'#1f2a3d'}">
+    🎯 ${trackState.group.has(i)?'ضمن المجموعة':'أضِف للمجموعة'}
+  </button>
+  <button onclick="removeBody(${i})" style="background:var(--bad)">حذف</button>
+</div>
+
+    `;
     cardsRoot.appendChild(card);
+  });
+}
+function selectBody(index){ bodies.forEach((b,i)=>b.selected=(i===index)); refreshCards(); }
+function removeBody(index){ bodies.splice(index,1); refreshCards(); refreshTrackList(); }
+function toggleTrackGroup(i){
+  if (trackState.group.has(i)) trackState.group.delete(i);
+  else trackState.group.add(i);
+  refreshCards();
+}
+
+/* مركز الكتلة */
+function getCenterOfMass(){
+  if (!bodies.length) return {x:0,y:0,z:0};
+  let m=0,x=0,y=0,z=0;
+  for (const b of bodies){ m+=b.mass; x+=b.mass*b.x; y+=b.mass*b.y; z+=b.mass*b.z; }
+  return m>0?{x:x/m,y:y/m,z:z/m}:{x:0,y:0,z:0};
+}
+function getGroupCenter(){
+  if (trackState.group.size === 0) return null;
+  let M=0, x=0, y=0, z=0;
+  for (const i of trackState.group){
+    const b = bodies[i]; if (!b) continue;
+    const m = Math.max(1, b.mass); // ترجيح بالكتلة
+    M+=m; x+=m*b.x; y+=m*b.y; z+=m*b.z;
+  }
+  if (M===0) return null;
+  return {x:x/M, y:y/M, z:z/M};
+}
+
+function getTrackOffset(){
+  switch(trackState.mode){
+    case 'body': {
+      const i = trackState.bodyIndex;
+      const b = (i>=0 && bodies[i]) ? bodies[i] : null;
+      return b ? {x:b.x, y:b.y, z:b.z} : {x:0,y:0,z:0};
+    }
+    case 'group': {
+      const g = getGroupCenter();
+      return g ? g : {x:0,y:0,z:0};
+    }
+    case 'cm': return getCenterOfMass();
+    case 'free':
+    default: return {x:0,y:0,z:0};
   }
 }
 
-function stepOnce(){
-  currentDt = integrateAdaptive(state.dt);
-  handleCollisions();
-  pushTrail();
+function heaviestIndex(){
+  if (!bodies.length) return -1;
+  let hi = 0;
+  for (let i=1;i<bodies.length;i++) if (bodies[i].mass > bodies[hi].mass) hi = i;
+  return hi;
 }
 
-function loop(){ 
-  if(running) stepOnce(); 
-  render(); 
-  renderHUD(); 
-  requestAnimationFrame(loop); 
+function getTotalMomentum(){
+  let Px=0, Py=0, Pz=0;
+  for (const b of bodies){ Px += b.mass*b.vx; Py += b.mass*b.vy; Pz += b.mass*b.vz; }
+  return {Px,Py,Pz};
 }
 
-// بدء
+/*  الإطار الباري-المركزي: نطرح مركز الكتلة وسرعته من الجميع */
+function reframeToBarycentric(){
+  if (!bodies.length) return;
+  let M=0, cx=0, cy=0, cz=0, cvx=0, cvy=0, cvz=0;
+  for (const b of bodies){
+    M += b.mass;
+    cx += b.mass*b.x; cy += b.mass*b.y; cz += b.mass*b.z;
+    cvx += b.mass*b.vx; cvy += b.mass*b.vy; cvz += b.mass*b.vz;
+  }
+  if (M <= 0) return;
+  cx/=M; cy/=M; cz/=M; cvx/=M; cvy/=M; cvz/=M;
+  for (const b of bodies){
+    b.x -= cx; b.y -= cy; b.z -= cz;
+    b.vx -= cvx; b.vy -= cvy; b.vz -= cvz;
+  }
+  refreshCards(); refreshTrackList(); updateCamera(); // شكلًا فقط
+}
+
+/* تثبيت الأصل عند الأثقل: نطرح موضع/سرعة الأثقل من الجميع */
+function anchorToHeaviest(){
+  const hi = heaviestIndex();
+  if (hi < 0) return;
+  const H = bodies[hi];
+  for (const b of bodies){
+    b.x -= H.x; b.y -= H.y; b.z -= H.z;
+    b.vx -= H.vx; b.vy -= H.vy; b.vz -= H.vz;
+  }
+  refreshCards(); refreshTrackList(); updateCamera();
+}
+
+/* توليف سرعات دائرية تقريبية حول الأثقل (اختياري): v = sqrt(GM/r) باتجاه عمودي على r */
+function retuneCircularAroundHeaviest(){
+  const hi = heaviestIndex();
+  if (hi < 0 || bodies.length < 2) return;
+  const H = bodies[hi];
+  for (let i=0;i<bodies.length;i++){
+    if (i === hi) continue;
+    const b = bodies[i];
+    // موضع وسرعة نسبةً للأثقل
+    const rx = b.x - H.x, ry = b.y - H.y, rz = b.z - H.z;
+    const r = Math.hypot(rx, ry, rz);
+    if (r < 1) continue;
+    const v_circ = Math.sqrt(G * H.mass / r);
+
+    // نختار اتجاه سرعة عمودي على r قدر الإمكان حسب المستوى الحالي:
+    // لو كان للبُرج سرعة حالية، نستخدم المركبة العمودية على r لحفظ اتجاه المدار
+    let vx = b.vx - H.vx, vy = b.vy - H.vy, vz = b.vz - H.vz;
+    // مركبة v العمودية على r: v_perp = v - (v·r̂) r̂
+    const rhatx = rx/r, rhaty = ry/r, rhatz = rz/r;
+    const vdotr = vx*rhatx + vy*rhaty + vz*rhatz;
+    let vpx = vx - vdotr*rhatx, vpy = vy - vdotr*rhaty, vpz = vz - vdotr*rhatz;
+    let vp = Math.hypot(vpx,vpy,vpz);
+
+    if (vp < 1e-9){
+      // لو السرعة تقريبا صفر، نختار اتجاهًا ثابتًا عموديًا على r (مثل z×r)
+      // n = k × r
+      const nx = -ry, ny = rx, nz = 0;
+      const nlen = Math.hypot(nx,ny,nz) || 1;
+      vpx = nx/nlen; vpy = ny/nlen; vpz = nz/nlen; vp = 1;
+    } else {
+      // طبّع الاتجاه الحالي العمودي
+      vpx /= vp; vpy /= vp; vpz /= vp;
+    }
+    // اضبط مقدار السرعة للدائرية
+    vx = vpx * v_circ; vy = vpy * v_circ; vz = vpz * v_circ;
+
+    // ارجع إلى الإطار العام (نجعل الأثقل ساكن بعد ذلك بزرّ التثبيت إن رغبت)
+    b.vx = H.vx + vx; b.vy = H.vy + vy; b.vz = H.vz + vz;
+  }
+  refreshCards();
+}
+
+
+/* شبكة + محور XYZ */
+function drawGrid(ctx){
+  if (!state.showGrid) return;
+
+  // مركز الكاميرا (حسب وضع التتبّع)
+  const center = getTrackOffset();
+
+  // حجم الخلية يتكيّف مع المسافة (كل 10^k تقريبًا)
+  const base = cam.dist * 0.5;
+  const gridSize = Math.pow(10, Math.floor(Math.log10(Math.max(1, base))));
+  const fine = gridSize / 5; // خطوط ثانوية
+  const worldPerPixel = (cam.dist / Math.max(1, cam.scale)); // تقدير تقريبي
+
+  // مدى الرسم بالبيكسل → حوّله لعالم
+  const w = view.width, h = view.height;
+  const spanX = worldPerPixel * (w / cam.dist);
+  const spanY = worldPerPixel * (h / cam.dist);
+
+  // انزياح بحيث تبقى خطوط الشبكة "مقنّعة" تحت الكاميرا
+  // نستخدم باقي القسمة لإزاحة الشبكة مع تحرّك الكاميرا
+  const offX = ((center.x % gridSize) + gridSize) % gridSize;
+  const offY = ((center.y % gridSize) + gridSize) % gridSize;
+  const offXf = ((center.x % fine) + fine) % fine;
+  const offYf = ((center.y % fine) + fine) % fine;
+
+  // عدد الخطوط الكافي لتغطية الشاشة
+  const N = 50;
+
+  // خطوط ثانوية
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(160, 180, 210, .10)';
+  for (let i=-N;i<=N;i++){
+    const xw = center.x - offX + i*fine;
+    const yw = center.y - offY + i*fine;
+
+    const p1 = project(xw, center.y - N*fine, center.z);
+    const p2 = project(xw, center.y + N*fine, center.z);
+    if (p1 && p2){ ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke(); }
+
+    const p3 = project(center.x - N*fine, yw, center.z);
+    const p4 = project(center.x + N*fine, yw, center.z);
+    if (p3 && p4){ ctx.beginPath(); ctx.moveTo(p3[0],p3[1]); ctx.lineTo(p4[0],p4[1]); ctx.stroke(); }
+  }
+
+  // خطوط رئيسية
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid') || '#1f2a3d';
+  for (let i=-N;i<=N;i++){
+    const xw = center.x - offX + i*gridSize;
+    const yw = center.y - offY + i*gridSize;
+
+    const p1 = project(xw, center.y - N*gridSize, center.z);
+    const p2 = project(xw, center.y + N*gridSize, center.z);
+    if (p1 && p2){ ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke(); }
+
+    const p3 = project(center.x - N*gridSize, yw, center.z);
+    const p4 = project(center.x + N*gridSize, yw, center.z);
+    if (p3 && p4){ ctx.beginPath(); ctx.moveTo(p3[0],p3[1]); ctx.lineTo(p4[0],p4[1]); ctx.stroke(); }
+  }
+}
+
+function drawAxes(){
+  const c = getCenterOfMass();
+  const L = cam.dist * 0.4;
+  const axes = [
+    {p:[c.x, c.y, c.z], q:[c.x+L, c.y, c.z], col:'#ff6666', label:'X'},
+    {p:[c.x, c.y, c.z], q:[c.x, c.y+L, c.z], col:'#66ff66', label:'Y'},
+    {p:[c.x, c.y, c.z], q:[c.x, c.y, c.z+L], col:'#66ccff', label:'Z'},
+  ];
+  ctx.lineWidth = 2;
+  for (const a of axes){
+    const P = project(...a.p), Q = project(...a.q);
+    if (P && Q){
+      ctx.strokeStyle = a.col; ctx.beginPath(); ctx.moveTo(P[0],P[1]); ctx.lineTo(Q[0],Q[1]); ctx.stroke();
+    }
+  }
+}
+
+/* رسم */
+function draw(){
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg') || '#000';
+  ctx.fillRect(0,0,view.width,view.height);
+  drawGrid(ctx); drawAxes();
+
+  const trkSel = Number(q('track').value);
+  const trackBody = isFinite(trkSel) && trkSel>=0 ? bodies[trkSel] : null;
+  const trackOffset = getTrackOffset() ? {x:trackBody.x,y:trackBody.y,z:trackBody.z} : {x:0,y:0,z:0};
+
+  const sorted = bodies.map((b,i)=>({...b,__i:i}))
+    .sort((A,B)=>{
+      const pa = project(A.x - trackOffset.x, A.y-trackOffset.y, A.z-trackOffset.z);
+      const pb = project(B.x - trackOffset.x, B.y-trackOffset.y, B.z-trackOffset.z);
+      return ((pb?.[2]||0) - (pa?.[2]||0));
+    });
+
+  for (const b of sorted){
+    const pos = project(b.x - trackOffset.x, b.y - trackOffset.y, b.z - trackOffset.z);
+    if (!pos) continue;
+    const [X,Y,z2,scale] = pos;
+    const rDyn = Math.max(2, Math.cbrt(Math.max(1e0, b.mass)/1e20) * (cam.dist/Math.max(1,z2)) * 0.0005);
+    const radius = isFinite(rDyn)? rDyn : 2;
+
+    // Trail
+    if (state.trails && b.trail && b.trail.length > 1){
+      ctx.beginPath(); ctx.strokeStyle = b.color; ctx.lineWidth = 1;
+      let first = true;
+      for (const p of b.trail){
+        const t = project(p.x - trackOffset.x, p.y - trackOffset.y, p.z - trackOffset.z);
+        if (!t) continue;
+        if (first){ ctx.moveTo(t[0],t[1]); first=false; } else ctx.lineTo(t[0],t[1]);
+      }
+      ctx.stroke();
+    }
+
+    // Body
+    ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(X,Y,radius,0,Math.PI*2);
+    if (isFinite(X) && isFinite(Y) && isFinite(radius)) ctx.fill();
+    if (b.selected){ ctx.strokeStyle = 'var(--accent)'; ctx.lineWidth = 2; ctx.stroke(); }
+  }
+}
+
+/* HUD + رسم المخطط */
+let lastEnergy = 0, energyHistory = [];
+function updateStats(){
+  const { E, KE, PE, Lz } = energyAndAngMom();
+  if (lastEnergy === 0) lastEnergy = E;
+  const dE = Math.abs((E - lastEnergy) / lastEnergy) * 1e2 || 0;
+
+  hudStats.innerHTML = `
+    <span>الوقت (س):</span> <span>${(time/3600).toFixed(1)}</span>
+    <span>الطاقة الكلية:</span> <span>${E.toExponential(4)} J</span>
+    <span>التغير (٪):</span> <span style="color:var(--${dE < 0.01 ? 'good' : dE < 0.1 ? 'warn' : 'bad'})">${dE.toFixed(4)} %</span>
+    <span>الزخم الزاوي Z:</span> <span>${Lz.toExponential(4)}</span>
+    <span>dt المستخدم:</span> <span>${currentDt.toExponential(2)} ث</span>
+  `;
+  energyHistory.push(dE); if (energyHistory.length>120) energyHistory.shift();
+
+  cctx.clearRect(0,0,chart.width,chart.height);
+  const maxErr = Math.max(0.001, ...energyHistory);
+  const scaleY = chart.height / maxErr;
+  cctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#59c1ff';
+  cctx.lineWidth = 1.5;
+  cctx.beginPath();
+  const startX = Math.max(0, chart.width - energyHistory.length);
+  cctx.moveTo(startX, chart.height - energyHistory[0] * scaleY);
+  energyHistory.forEach((v,i)=>cctx.lineTo(startX+i, chart.height - v*scaleY));
+  cctx.stroke();
+}
+
+/* حلقة التحديث */
+function updateSimulation(){
+  const t0 = performance.now();
+  let steps = 0;
+  while (running && (performance.now() - t0) < 10){
+    const dt = +q('dt').value || 1;
+    integrateAdaptive(dt);
+    handleCollisions();
+    bodies.forEach(b=>{
+      b.trail.push({x:b.x,y:b.y,z:b.z});
+      if (b.trail.length>600) b.trail.shift();
+    });
+    steps++;
+  }
+  if (steps>0) updateStats();
+}
+function loop(){ if (running) updateSimulation(); draw(); requestAnimationFrame(loop); }
+
+/* إعداد المشاهد */
+const initialBodies = [
+  { name:"Sun", mass:1.989e30, x:0,y:0,z:0, vx:0,vy:0,vz:0, radius:696340e3, color:'#f7f43e' },
+  { name:"Mercury", mass:3.302e23, x:46.0e9,y:0,z:0, vx:0,vy:58980,vz:0, radius:2440e3, color:'#bdbdbd' },
+  { name:"Earth", mass:5.972e24, x:1.5e11,y:0,z:0, vx:0,vy:29780,vz:0, radius:6371e3, color:'#59c1ff' }
+];
+function loadPreset(name){
+  time=0; bodies=[]; energyHistory=[]; lastEnergy=0;
+  let presetBodies=[];
+  switch(name){
+    case 'solar': presetBodies = initialBodies; break;
+    case 'binary':
+      presetBodies = [
+        { name:"Star A", mass:2e30, x:-1e11,y:0,z:0, vx:0,vy:-15000,vz:0, radius:7e8, color:'#f7cc60' },
+        { name:"Star B", mass:1e30, x: 2e11,y:0,z:0, vx:0,vy: 30000,vz:0, radius:5e8, color:'#c39df3' }
+      ]; break;
+    case 'three':
+      presetBodies = [
+        { name:"Body 1", mass:1e27, x:1e10,y:0,z:0, vx:0,vy:0,vz:0, radius:1e7, color:randColor() },
+        { name:"Body 2", mass:1e27, x:-1e10,y:0,z:0, vx:0,vy:0,vz:0, radius:1e7, color:randColor() },
+        { name:"Body 3", mass:1e27, x:0,y:1e10,z:0, vx:0,vy:0,vz:0, radius:1e7, color:randColor() }
+      ]; break;
+    case 'bhStar':
+      presetBodies = [
+        { name:"Black Hole", mass:1e32, x:0,y:0,z:0, vx:0,vy:0,vz:0, radius:10e3, color:'#2b2b2b' },
+        { name:"Star", mass:2e30, x:5e11,y:0,z:0, vx:0,vy:20000,vz:0, radius:7e8, color:'#ff7b72' }
+      ];
+      q('enablePN').checked = true; state.pn = true;
+      break;
+    case 'random':
+      for (let i=0;i<10;i++){
+        presetBodies.push({
+          name:"R-Body "+(i+1),
+          mass: 1e25 + Math.random()*1e26,
+          x:(Math.random()-0.5)*5e11, y:(Math.random()-0.5)*5e11, z:(Math.random()-0.5)*5e11,
+          vx:(Math.random()-0.5)*10000, vy:(Math.random()-0.5)*10000, vz:(Math.random()-0.5)*10000,
+          radius: 1e7 + Math.random()*5e7, color:randColor()
+        });
+      }
+      trackState.group.clear(); // تفريغ مجموعة التتبّع عند تغيير المشهد
+
+      break;
+  }
+  presetBodies.forEach(b=>{ b.trail=[]; bodies.push(b); });
+  if (q('enablePN')) q('enablePN').checked = state.pn;
+  refreshCards(); refreshTrackList(); updateCamera(); reorbit();
+  q('btnLoadPreset').disabled = false;
+  // في نهاية loadPreset:
+if (q('anchorHeavy')?.checked) anchorToHeaviest(); else reframeToBarycentric();
+
+}
+
+/* تتبع وإعادة حساب */
+function refreshTrackList(){
+  const select = q('track');
+  const prev = Number(select.value);
+  select.innerHTML = '<option value="-1">المرجح (CM)</option>';
+  bodies.forEach((b,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=b.name; select.appendChild(o); });
+  select.value = (!isFinite(prev) || prev>=bodies.length) ? '-1' : String(prev);
+  trackState.bodyIndex = Number(select.value);
+}
+q('track').onchange = e => { trackState.bodyIndex = Number(e.target.value); };
+
+function reorbit(){ bodies.forEach((b,i)=>computeRelativisticOrbitForBody(i)); refreshCards(); }
+
+/* واجهة الأحداث */
+function bindUI(){
+  q('btnPlay').onclick = () => { running = !running; q('btnPlay').textContent = running ? '⏸ إيقاف' : '▶ تشغيل'; };
+  q('btnStep').onclick = () => { if (!running){ integrateAdaptive(+q('dt').value || 1); handleCollisions(); updateStats(); } };
+  q('btnReset').onclick = () => loadPreset(q('preset').value);
+
+  q('speedMul').onchange = e => state.speedMul = Math.max(0.1, +e.target.value || 1);
+  q('dt').onchange = e => state.dt = +e.target.value || 1;
+  q('adaptive').onchange = e => state.adaptive = e.target.checked;
+  q('enablePN').onchange = e => { state.pn = e.target.checked; if (e.target.checked) reorbit(); };
+  q('collisionMode').onchange = e => state.collision = e.target.value;
+
+  q('preset').onchange = () => { q('btnLoadPreset').disabled = false; };
+  q('btnLoadPreset').onclick = () => { loadPreset(q('preset').value); };
+
+  q('showTrails').onchange = e => state.trails = e.target.checked;
+  q('showGrid').onchange = e => state.showGrid = e.target.checked;
+  q('btnReorbit').onclick = reorbit;
+  q('btnTrackRecalc').onclick = () => { reorbit(); setTimeout(reorbit, 40000 / Math.max(0.1,state.speedMul)); };
+
+  q('trackMode').onchange = e => { trackState.mode = e.target.value; };
+
+  q('btnAdd').onclick = () => {
+  const m = +q('bMass').value || 1;
+  const newBody = {
+    name: q('bName').value || "Body",
+    mass: m,
+    x:+q('bX').value||0, y:+q('bY').value||0, z:+q('bZ').value||0,
+    vx:+q('bVX').value||0, vy:+q('bVY').value||0, vz:+q('bVZ').value||0,
+    radius: Math.max(1000, Math.cbrt(Math.max(1,m)/1e20) * 1e7),
+    color: randColor(),
+    trail: []
+  };
+  bodies.push(newBody);
+
+  // لو الجرم الجديد أثقل من مجموع الباقي × 0.5 أو أثقل من الأثقل السابق → أعِد التموضع
+  const totalOthers = bodies.slice(0,-1).reduce((s,b)=>s+b.mass,0);
+  const heavyChanged = (m > totalOthers*0.5) || (heaviestIndex() === bodies.length-1);
+  if (q('anchorHeavy').checked && heavyChanged){
+    // (1) طوّر الإطار مرجعيًا للأثقل
+    anchorToHeaviest();
+    // (2) اختيارية: لو تحب ضبط سرعات للأجرام الأخرى مباشرةً:
+    // retuneCircularAroundHeaviest();
+  } else {
+    // افتراضيًا: على الأقل خلّي الإطار باري-مركزي
+    reframeToBarycentric();
+  }
+
+  refreshCards();
+  refreshTrackList();
+  reorbit();
+};
+
+  q('btnClear').onclick = () => { bodies=[]; refreshCards(); refreshTrackList(); };
+
+  q('btnCSV').onclick = () => {
+    let csv = "Time(s),Body Name,x,y,z,vx,vy,vz\n";
+    bodies.forEach(b=>{ csv += `${time},${b.name},${b.x},${b.y},${b.z},${b.vx},${b.vy},${b.vz}\n`; });
+    const blob = new Blob([csv], { type:'text/csv' });
+    const a = document.createElement('a');
+    a.download = 'nbody_sim_' + new Date().toISOString().replace(/[:.]/g,'-') + '.csv';
+    a.href = URL.createObjectURL(blob); a.click(); URL.revokeObjectURL(a.href);
+  };
+  q('btnBary').onclick = () => { reframeToBarycentric(); reorbit(); };
+q('btnAnchorHeavy').onclick = () => { anchorToHeaviest(); reorbit(); };
+q('btnRetune').onclick = () => { retuneCircularAroundHeaviest(); if (q('anchorHeavy').checked) anchorToHeaviest(); reorbit(); };
+
+  /* زر التسخين */
+  q('btnWarmup').onclick = () => warmup(200, 0.2);
+}
+
+/* تسخين النظام كما طلبت */
+function warmup(steps=200, dtFactor=0.2){
+  const base = state.dt;
+  const oldAdaptive = state.adaptive;
+  state.adaptive = false;
+  for (let k=0;k<steps;k++){
+    rk4Step(base * dtFactor, state.pn);
+    time += base * dtFactor;
+    bodies.forEach(b=>{
+      b.trail.push({x:b.x,y:b.y,z:b.z});
+      if (b.trail.length>600) b.trail.shift();
+    });
+  }
+  state.adaptive = oldAdaptive;
+  updateStats();
+}
+
+/* إعادة حساب دوري */
+let autoReorbitInterval;
+function startAutoReorbit(){
+  clearInterval(autoReorbitInterval);
+  autoReorbitInterval = setInterval(()=>{ if (running && q('autoReorbit').checked) reorbit(); }, 30000);
+}
+
+/* تشغيل أولي */
+resize(); updateCamera();
 loadPreset('solar');
-loop();
-  </script>
+bindUI();
+startAutoReorbit();
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
