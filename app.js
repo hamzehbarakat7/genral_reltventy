@@ -912,6 +912,105 @@ function performAnalysis(){
   console.log(report);
   alert(report);
 }
+// ---------- تقرير الجاذبية المفصّل (تدرّجي + رقمي) ----------
+function generateGravityReport() {
+  if (bodies.length === 0) {
+    alert("لا توجد أجسام للمحاكاة.");
+    return;
+  }
+
+  const lines = [];
+  lines.push("تقرير الجاذبية — محاكي الزمكان 3D");
+  lines.push("الوقت (s): " + time.toFixed(6));
+  lines.push("عدد الأجسام: " + bodies.length);
+  lines.push("");
+
+  // إعدادات التقريب
+  lines.push("إعدادات المحاكي:");
+  lines.push(`  G = ${G} (m^3 kg^-1 s^-2)`);
+  lines.push(`  C = ${C} (m/s)`);
+  lines.push(`  softening base (SOFT) = ${SOFT}`);
+  lines.push(`  adaptive = ${state.adaptive}, usePN = ${state.pn}, usePN2 = ${state.pn2}`);
+  lines.push("");
+
+  // دالة مساعدة لكتابة معادلة لكل زوج
+  for (let i = 0; i < bodies.length; i++) {
+    const bi = bodies[i];
+    lines.push(`=== جسم ${i}: ${bi.name} (m=${bi.mass.toExponential(4)}) ===`);
+    lines.push(`موقع: (${bi.x.toExponential(4)}, ${bi.y.toExponential(4)}, ${bi.z.toExponential(4)}) m`);
+    lines.push(`سرعة: (${bi.vx.toExponential(4)}, ${bi.vy.toExponential(4)}, ${bi.vz.toExponential(4)}) m/s`);
+    lines.push("");
+    lines.push("المعادلات والمساهمات من كل زوج:");
+    let totalFx = 0, totalFy = 0, totalFz = 0;
+    for (let j = 0; j < bodies.length; j++) {
+      if (j === i) continue;
+      const bj = bodies[j];
+      const dx = bj.x - bi.x, dy = bj.y - bi.y, dz = bj.z - bi.z;
+      const r2 = dx*dx + dy*dy + dz*dz;
+      const radiusSum = (bi.radius || 0) + (bj.radius || 0);
+      const soft = Math.max(SOFT, radiusSum * 0.05);
+      const r2s = r2 + soft*soft;
+      const r = Math.sqrt(r2s);
+      const invr3 = 1.0 / (r2s * r + 1e-30);
+      // القوة النيوتونية (موجهة من i إلى j)
+      const F = G * bi.mass * bj.mass * invr3;
+      const Fx = F * dx, Fy = F * dy, Fz = F * dz;
+      totalFx += Fx; totalFy += Fy; totalFz += Fz;
+
+      lines.push(`  زوج مع (${j}) ${bj.name}:`);
+      lines.push(`    Δr = (${dx.toExponential(3)}, ${dy.toExponential(3)}, ${dz.toExponential(3)}) m`);
+      lines.push(`    r (softened) = ${r.toExponential(6)} m    (softening used = ${soft.toExponential(3)})`);
+      lines.push(`    صيغة: F_ij = G m_i m_j * r_vec / (r^2 + ε^2)^(3/2)`);
+      lines.push(`    الناتج: Fx=${Fx.toExponential(6)} N, Fy=${Fy.toExponential(6)} N, Fz=${Fz.toExponential(6)} N, |F|=${Math.hypot(Fx,Fy,Fz).toExponential(6)} N`);
+      lines.push(`    مساهمة بالعجلة على ${bi.name}: ax+=${(Fx/bi.mass).toExponential(6)} m/s², ay+=${(Fy/bi.mass).toExponential(6)}, az+=${(Fz/bi.mass).toExponential(6)}`);
+      lines.push("");
+    }
+
+    const axTot = totalFx / bi.mass, ayTot = totalFy / bi.mass, azTot = totalFz / bi.mass;
+    lines.push(`  مجموع القوى على ${bi.name}: Fx=${totalFx.toExponential(6)}, Fy=${totalFy.toExponential(6)}, Fz=${totalFz.toExponential(6)} N`);
+    lines.push(`  => تسارع صافي: ax=${axTot.toExponential(6)} m/s², ay=${ayTot.toExponential(6)}, az=${azTot.toExponential(6)}`);
+    lines.push("");
+
+    // عناصر المدار إن أمكن (نستخدم نفس الصيغ في computeRelativisticOrbitForBody)
+    // حساب العناصر الدورانية البسيطة
+    // (تعتمد على الجسم المرجعي الأثقل — نستخدم نفس طريقة reorbit)
+    // استفادة من الدوال المساعدة الموجودة
+    try {
+      computeRelativisticOrbitForBody(i); // يملأ b.a و b.e و b.precession
+      const b = bodies[i];
+      lines.push(`  عناصر المدار (محسوبة): a = ${isFinite(b.a)?b.a.toExponential(6):'—'} m, e = ${isFinite(b.e)?b.e.toFixed(6):'—'}`);
+      lines.push(`  مدة الدورة (T) ≈ ${b.period? (b.period/86400).toFixed(4) + ' يوم':'—'}`);
+      if (b.precession) lines.push(`  تقدّم (precession) ≈ ${b.precession.toFixed(6)} \"/قرن`);
+    } catch(e) {
+      lines.push("  (تعذّر حساب عناصر المدار: البيانات غير كافية)");
+    }
+    lines.push("");
+  }
+
+  // ملخص النماذج والتقريبات
+  lines.push("شروط الصحة والافتراضات:");
+  lines.push(" - softening (ε) مُستخدم لتجنّب التفجّر العددي عند المسافات الصغيرة. اختيار كبير جداً يخفّف القوى الواقعية.");
+  lines.push(" - 1PN مفيد إذا: v^2/c^2 >= ~1e-6 أو قرب أجسام ضخمة (ثقوب سوداء، نجوم نيوترونية).");
+  lines.push(" - 2PN واستخدام gravWaves مفيد فقط للأنظمة شديدة الكثافة/قريبة جداً.");
+  lines.push("");
+  lines.push("نهاية التقرير.");
+
+  const blob = new Blob([lines.join('\\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.download = 'gravity_report_' + new Date().toISOString().replace(/[:.]/g,'-') + '.txt';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ربط الزر في الواجهة (إذا وُجد)
+function bindReportButtonOnce() {
+  if (q('btnReport')) {
+    q('btnReport').onclick = generateGravityReport;
+  }
+}
+// نجرّب الربط بعد تحميل الواجهة
+setTimeout(bindReportButtonOnce, 250);
 
 /* واجهة الأحداث */
 function bindUI(){
